@@ -1,0 +1,47 @@
+import operator
+import psycopg2
+import logging
+f= open(r"C:\Users\singh\Desktop\study_mat\python\input_assign1.txt", "r")
+contents = f.readlines()
+logging.info("Read the text file successfully")
+x=1
+connection =psycopg2.connect(user="postgres", password="Gurveen@23", host="localhost", port="5432", database= "postgres")
+connection.autocommit=True
+logging.info("Connection to database made successfully")
+for input in contents:
+#   print(input)
+    elements = input.split()
+    op1=elements[0]
+    op2=elements[2]
+    oper=elements[1]
+    ops = {
+        '+' : operator.add,
+        '-' : operator.sub,
+        '*' : operator.mul,
+        '/' : operator.truediv,  
+        '%' : operator.mod,
+        '^' : operator.xor,
+    }
+
+    def result(op1, oper, op2):
+        op1, op2 = int(op1), int(op2)
+        return ops[oper](op1, op2)
+    finalres= result(*(elements))
+    logging.info("Python logic worked successfully")
+#   print(op1, oper, op2, "=", finalres)
+    cursor=connection.cursor()
+    while(x!=0):
+        cursor.execute('''DROP TABLE IF EXISTS dbassign1''')
+        cursor.execute('''CREATE TABLE dbassign1(dboperation varchar, dboperand1 int, dboperand2 int, fresult int)''')
+        x=0
+
+    cursor.execute('''INSERT INTO dbassign1 VALUES(%s, %s, %s,%s)''',(oper ,op1,op2, finalres))
+    cursor.execute('''SELECT * FROM dbassign1''')
+    myresult= cursor.fetchall()
+    logging.info("Data added to database successfully")
+
+for y in myresult: 
+    print(y)
+connection.commit()
+connection.close()
+logging.info("Connection closed successfully")
